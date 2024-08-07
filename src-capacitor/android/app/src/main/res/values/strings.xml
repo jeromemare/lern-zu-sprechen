@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Learnn 2 Speak</string>
+    <string name="title_activity_main">Learnn 2 Speak</string>
+    <string name="package_name">com.gsmll.app.learn2speak</string>
+    <string name="custom_url_scheme">com.gsmll.app.learn2speak</string>
+</resources>
