@@ -1,51 +1,61 @@
 <template>
   <q-page class="flex justify-center">
     <div class="q-gutter-y-md column">
-      <div class="row items-center input-frame">
-        <div style="padding-right:10px">
+      <q-field :model-value="sentence" bottom-slots :dense="dense" style="width: 80vw; max-width: 400px">
+
+        <template v-slot:control>
+          <div class="self-center full-width no-outline" tabindex="0">{{ sentence }}</div>
+        </template>
+
+        <template v-slot:hint>
+          Saisir une phrase ou un mot à prononcer
+        </template>
+
+        <template v-slot:after>
           <q-btn
-            icon="mdi-account-voice"
-            :disable="!sentence || isSpeaking || isRecording"
             round
-            size="20px"
+            dense
+            flat
+            :disable="!sentence || isSpeaking || isRecording"
+            icon="mdi-account-voice"
             @click="speak"
           >
             <q-tooltip>Ecouter le mot ou la phrase</q-tooltip>
           </q-btn>
-        </div>
-        <q-input
-          class="input"
-          type="textarea"
-          autogrow
-          :class="{ 'input-text': !!sentence }"
-          v-model="sentence"
-          :lines="2"
-          placeholder="Saisir une phrase ou un mot" hint="C'est le mot qu'il faut prononcer en allemand"
-          clearable
-          style="width: 250px"
-        />
-        <q-btn
-          :icon="buttonIcon"
-          :disable="!sentence || isSpeaking"
-          :loading="isProcessing"
-          :color="isRecording ? 'red' : 'primary'"
-          round
-          size="30px"
-          @click="toggleRecord"
-        >
-          <q-tooltip>{{ recordTooltip }}</q-tooltip>
-          <template v-slot:loading>
-            <q-spinner-gears />
-          </template>
-        </q-btn>
+        </template>
 
+      </q-field>
+
+      <div>
+        <div class="record-button center">
+          <q-btn
+            :icon="buttonIcon"
+            :disable="!sentence || isSpeaking"
+            :loading="isProcessing"
+            :color="isRecording ? 'red' : 'primary'"
+            round
+            size="30px"
+            @click="toggleRecord"
+          >
+            <q-tooltip>{{ recordTooltip }}</q-tooltip>
+            <template v-slot:loading>
+              <q-spinner-gears />
+            </template>
+          </q-btn>
+        </div>
       </div>
 
-      <q-list style="max-height: 500px">
+      <q-list
+        v-if="results.length > 0"
+        class="result-list"
+      >
+        <div>Résultats</div>
+        <q-separator />
         <q-item
           v-for="result in results"
           :key="result.fmtDate"
           :style="`background-color: ${result.color}`"
+          class="result-tile"
         >
           <q-item-section>
             <q-item-label class="result">
@@ -58,7 +68,6 @@
           </q-item-section>
         </q-item>
       </q-list>
-
     </div>
   </q-page>
 </template>
@@ -199,6 +208,10 @@ async function speak () {
 </script>
 
 <style scoped>
+.record-button {
+  padding-top: 20px;
+}
+
 .input-frame {
   padding-top: 20px;
 }
@@ -228,5 +241,13 @@ async function speak () {
 
 .result-score {
   font-size: 1.8em;
+}
+
+.result-tile {
+  border-radius: 8px;
+}
+
+.result-list {
+  padding-top: 100px;
 }
 </style>
