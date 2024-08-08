@@ -100,7 +100,6 @@ let mediaRecorder = null
 
 async function validate (audio) {
   try {
-    console.log({ audio })
     const data = {
       input: sentence.value,
       audio,
@@ -117,7 +116,7 @@ async function validate (audio) {
         Authorization: `Bearer ${process.env.API_TOKEN}`
       }
     })
-    console.log('RESULTAT: ', response.data)
+
     const { utterance_score: scoreIndice } = response?.data || {}
     if (scoreIndice) {
       const date = new Date()
@@ -138,8 +137,6 @@ async function validate (audio) {
 
 async function recordAudio () {
   if (navigator.mediaDevices) {
-    console.log('getUserMedia supported.')
-
     const constraints = { audio: true }
     let chunks = []
 
