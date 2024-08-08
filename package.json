@@ -18,9 +18,11 @@
   "dependencies": {
     "@quasar/cli": "^2.4.1",
     "@quasar/extras": "^1.16.4",
+    "artyom.js": "^1.0.6",
     "axios": "^1.2.1",
     "chroma-js": "^2.6.0",
     "date-fns": "^3.6.0",
+    "lodash": "^4.17.21",
     "pinia": "^2.0.11",
     "quasar": "^2.6.0",
     "vue": "^3.0.0",

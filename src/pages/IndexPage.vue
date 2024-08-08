@@ -1,17 +1,47 @@
 <template>
   <q-page class="flex justify-center">
-
     <div class="q-gutter-y-md column">
-      <div>
-        <q-input class="input" v-model="sentence" placeholder="Saisir une phrase ou un mot" hint="C'est le mot qu'il faut prononcer en allemand"  style="width: 300px" />
-      </div>
-      <div class="col container">
-        <div class="center">
-          <q-btn :icon="buttonIcon" round size="30px" @click="toggleRecord" />
+      <div class="row items-center input-frame">
+        <div style="padding-right:10px">
+          <q-btn
+            icon="mdi-account-voice"
+            :disable="!sentence || isSpeaking || isRecording"
+            round
+            size="20px"
+            @click="speak"
+          >
+            <q-tooltip>Ecouter le mot ou la phrase</q-tooltip>
+          </q-btn>
         </div>
+        <q-input
+          class="input"
+          type="textarea"
+          autogrow
+          :class="{ 'input-text': !!sentence }"
+          v-model="sentence"
+          :lines="2"
+          placeholder="Saisir une phrase ou un mot" hint="C'est le mot qu'il faut prononcer en allemand"
+          clearable
+          style="width: 250px"
+        />
+        <q-btn
+          :icon="buttonIcon"
+          :disable="!sentence || isSpeaking"
+          :loading="isProcessing"
+          :color="isRecording ? 'red' : 'primary'"
+          round
+          size="30px"
+          @click="toggleRecord"
+        >
+          <q-tooltip>{{ recordTooltip }}</q-tooltip>
+          <template v-slot:loading>
+            <q-spinner-gears />
+          </template>
+        </q-btn>
+
       </div>
 
-      <q-list>
+      <q-list style="max-height: 500px">
         <q-item
           v-for="result in results"
           :key="result.fmtDate"
@@ -38,47 +68,62 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import format from 'date-fns/format'
 import chroma from 'chroma-js'
+import Artyom from 'artyom.js'
 
 const sentence = ref('')
 const isRecording = ref(false)
+const isProcessing = ref(false)
 const results = ref([])
 
 const buttonIcon = computed(() => {
   return isRecording.value ? 'stop' : 'mic'
 })
 
+const recordTooltip = computed(() => {
+  if (!sentence.value) {
+    return 'Vous devez saisir un mot ou une phrase'
+  }
+
+  return isRecording.value ? 'Arrêter' : 'Enregistrer'
+})
+
 let mediaRecorder = null
 
 async function validate (audio) {
-  console.log({ audio })
-  const data = {
-    input: sentence.value,
-    audio,
-    profile_name: 'default',
-    speaker_id: 'test',
-    persist: !1,
-    original_word_mapping: !0
-  }
-  const response = await axios.post(process.env.API_URL, data, {
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.API_KEY,
-      Authorization: `Bearer ${process.env.API_TOKEN}`
+  try {
+    console.log({ audio })
+    const data = {
+      input: sentence.value,
+      audio,
+      profile_name: 'default',
+      speaker_id: 'test',
+      persist: !1,
+      original_word_mapping: !0
     }
-  })
-  console.log('RESULTAT: ', response.data)
-  const { utterance_score: scoreIndice } = response?.data || {}
-  if (scoreIndice) {
-    const date = new Date()
-    const score = Math.round(scoreIndice * 100)
-    const color = chroma('red').mix('lightgreen', scoreIndice).hex()
-    results.value.push({
-      date: format(date, 'yyyyMMddHHmmss', new Date()),
-      fmtDate: format(date, 'HH:mm', new Date()),
-      text: sentence.value,
-      score,
-      color
+
+    const response = await axios.post(process.env.API_URL, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.API_KEY,
+        Authorization: `Bearer ${process.env.API_TOKEN}`
+      }
     })
+    console.log('RESULTAT: ', response.data)
+    const { utterance_score: scoreIndice } = response?.data || {}
+    if (scoreIndice) {
+      const date = new Date()
+      const score = Math.round(scoreIndice * 100)
+      const color = chroma('red').mix('lightgreen', scoreIndice).hex()
+      results.value.unshift({
+        date: format(date, 'yyyyMMddHHmmss', new Date()),
+        fmtDate: format(date, 'HH:mm', new Date()),
+        text: sentence.value,
+        score,
+        color
+      })
+    }
+  } finally {
+    isProcessing.value = false
   }
 }
 
@@ -94,6 +139,7 @@ async function recordAudio () {
       mediaRecorder.start()
 
       mediaRecorder.onstop = (e) => {
+        isProcessing.value = true
         const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' })
         chunks = []
         const fileReader = new FileReader()
@@ -128,11 +174,41 @@ async function toggleRecord () {
     stopRecordingAndValidate()
   }
 }
+
+const artyom = new Artyom()
+artyom.initialize({
+  debug: false,
+  continuous: false,
+  listen: false,
+  lang: 'de-DE'
+})
+
+const isSpeaking = ref(false)
+
+async function speak () {
+  artyom.say(sentence.value, {
+    onStart: function () {
+      isSpeaking.value = true
+    },
+    onEnd: function () {
+      isSpeaking.value = false
+    }
+  })
+}
+
 </script>
 
 <style scoped>
-.input {
+.input-frame {
   padding-top: 20px;
+}
+
+.input {
+  padding-right: 20px;
+}
+
+.input-text {
+  font-size: 1.4em;
 }
 
 .container {
