@@ -2,7 +2,9 @@
   <q-page class="flex justify-center">
 
     <div class="q-gutter-y-md column">
-      <q-input class="input" v-model="sentence" placeholder="Saisir une phrase ou un mot" hint="C'est le mot qu'il faudra prononcer en allemand"  style="width: 300px" />
+      <div>
+        <q-input class="input" v-model="sentence" placeholder="Saisir une phrase ou un mot" hint="C'est le mot qu'il faut prononcer en allemand"  style="width: 300px" />
+      </div>
       <div class="col container">
         <div class="center">
           <q-btn :icon="buttonIcon" round size="30px" @click="toggleRecord" />
