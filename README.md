@@ -1,4 +1,4 @@
-# Learnn 2 Speak (learn2speak)
+# Lerne zu Sprechen (lerne-zu-sprechen)
 
 Learn how to pronounce german
 
