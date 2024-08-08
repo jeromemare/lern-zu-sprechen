@@ -168,9 +168,29 @@ module.exports = configure(function (/* ctx */) {
       injectPwaMetaTags: true,
       swFilename: 'sw.js',
       manifestFilename: 'manifest.json',
-      useCredentialsForManifestTag: false
+      useCredentialsForManifestTag: false,
       // useFilenameHashes: true,
-      // extendGenerateSWOptions (cfg) {}
+      extendGenerateSWOptions (cfg) {
+        console.log(cfg)
+        if (!cfg.runtimeCaching) {
+          cfg.runtimeCaching = []
+        }
+
+        cfg.runtimeCaching.push({
+          urlPattern: /index\.html/,
+          handler: 'NetworkFirst',
+          options: {
+            // Fall back to the cache after 1 seconds.
+            networkTimeoutSeconds: 1,
+            // Use a custom cache name for this route.
+            cacheName: 'lzs-params-cache',
+            // Configure which responses are considered cacheable.
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        })
+      }
       // extendInjectManifestOptions (cfg) {},
       // extendManifestJson (json) {}
       // extendPWACustomSWConf (esbuildConf) {}

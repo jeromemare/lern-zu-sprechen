@@ -1,18 +1,22 @@
 <template>
   <q-page class="flex justify-center">
     <div class="q-gutter-y-md column">
-      <q-field :model-value="sentence" bottom-slots :dense="dense" style="width: 80vw; max-width: 400px">
 
-        <template v-slot:control>
-          <div class="self-center full-width no-outline" tabindex="0">{{ sentence }}</div>
-        </template>
-
-        <template v-slot:hint>
-          Saisir une phrase ou un mot à prononcer
-        </template>
+          <q-input
+          class="input"
+          type="textarea"
+          autogrow
+          :class="{ 'input-text': !!sentence }"
+          v-model="sentence"
+          :lines="2"
+          hint="Saisir une phrase ou un mot à prononcer"
+          clearable
+           style="width: 80vw; max-width: 400px"
+        >
 
         <template v-slot:after>
           <q-btn
+            v-if="isArtyomReady"
             round
             dense
             flat
@@ -24,7 +28,7 @@
           </q-btn>
         </template>
 
-      </q-field>
+      </q-input>
 
       <div>
         <div class="record-button center">
@@ -49,8 +53,16 @@
         v-if="results.length > 0"
         class="result-list"
       >
-        <div>Résultats</div>
-        <q-separator />
+        <q-item>
+          <q-item-section>
+            <q-item-label class="result-title">
+              Résultats
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-btn flat dense icon="mdi-trash-can-outline" @click="clearResults"></q-btn>
+          </q-item-section>
+        </q-item>
         <q-item
           v-for="result in results"
           :key="result.fmtDate"
@@ -121,7 +133,8 @@ async function validate (audio) {
     if (scoreIndice) {
       const date = new Date()
       const score = Math.round(scoreIndice * 100)
-      const color = chroma('red').mix('lightgreen', scoreIndice).hex()
+      const colorScale = chroma.scale(['red', 'orange', 'lightgreen']).mode('hsl')
+      const color = colorScale(scoreIndice).hex()
       results.value.unshift({
         date: format(date, 'yyyyMMddHHmmss', new Date()),
         fmtDate: format(date, 'HH:mm', new Date()),
@@ -181,12 +194,16 @@ async function toggleRecord () {
   }
 }
 
+const isArtyomReady = ref(false)
+
 const artyom = new Artyom()
 artyom.initialize({
   debug: false,
   continuous: false,
   listen: false,
   lang: 'de-DE'
+}).then(() => {
+  isArtyomReady.value = true
 })
 
 const isSpeaking = ref(false)
@@ -200,6 +217,10 @@ async function speak () {
       isSpeaking.value = false
     }
   })
+}
+
+function clearResults () {
+  results.value = []
 }
 
 </script>
@@ -242,6 +263,10 @@ async function speak () {
 
 .result-tile {
   border-radius: 8px;
+}
+
+.result-title {
+  font-size: 1.2em
 }
 
 .result-list {
