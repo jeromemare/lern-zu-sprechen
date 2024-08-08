@@ -11,6 +11,7 @@ require('dotenv').config()
 
 const { configure } = require('quasar/wrappers')
 const path = require('path')
+const publicPath = process.env.PUBLIC_PATH || null
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -73,7 +74,7 @@ module.exports = configure(function (/* ctx */) {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath,
       // analyze: true,
       // env: {},
       // rawDefine: {}

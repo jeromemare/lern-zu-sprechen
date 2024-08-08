@@ -8,8 +8,12 @@
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
+    "predeploy": "npm run build:gh",
+    "deploy": "gh-pages -d dist/spa",
     "dev": "quasar dev",
-    "build": "quasar build -m pwa"
+    "build": "quasar build",
+    "build:gh": "cross-env PUBLIC_PATH=lerne-zu-sprechen quasar build",
+    "build:pwa": "quasar build -m pwa"
   },
   "dependencies": {
     "@quasar/cli": "^2.4.1",
@@ -27,6 +31,7 @@
     "@intlify/vite-plugin-vue-i18n": "^3.3.1",
     "@quasar/app-vite": "^1.3.0",
     "autoprefixer": "^10.4.2",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
     "eslint": "^8.10.0",
     "eslint-config-standard": "^17.0.0",
@@ -34,6 +39,7 @@
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-vue": "^9.0.0",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.14",
     "workbox-build": "^7.1.1",
     "workbox-cacheable-response": "^7.1.0",
